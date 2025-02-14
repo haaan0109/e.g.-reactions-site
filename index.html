@@ -1,0 +1,72 @@
+<       
+      <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realtime Reactions</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        .reaction-container { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
+        .reaction { cursor: pointer; font-size: 24px; padding: 10px; border-radius: 5px; background-color: #f1f1f1; transition: 0.2s; }
+        .reaction:hover { background-color: #ddd; }
+    </style>
+</head>
+<body>
+
+    <h2>What do you think?</h2>
+    <p id="response-count">Loading...</p>
+
+    <div class="reaction-container">
+        <div class="reaction" onclick="react('upvote')">👍 <span id="upvote">0</span></div>
+        <div class="reaction" onclick="react('funny')">😆 <span id="funny">0</span></div>
+        <div class="reaction" onclick="react('love')">😍 <span id="love">0</span></div>
+        <div class="reaction" onclick="react('surprised')">😲 <span id="surprised">0</span></div>
+        <div class="reaction" onclick="react('angry')">😡 <span id="angry">0</span></div>
+        <div class="reaction" onclick="react('sad')">😢 <span id="sad">0</span></div>
+    </div>
+
+    <!-- Import Firebase modules -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getDatabase, ref, get, update, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+       const firebaseConfig = {
+  apiKey: "AIzaSyCaLunFy6t4pmM_wa4mIIU2SCmmndp6VJQ",
+  authDomain: "haaan0109.firebaseapp.com",
+  databaseURL: "https://haaan0109-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "haaan0109",
+  storageBucket: "haaan0109.firebasestorage.app",
+  messagingSenderId: "910488455918",
+  appId: "1:910488455918:web:4d35a83fd5698e6d4181ff",
+  measurementId: "G-MQPF2F78CB"
+};
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Function to handle reactions
+        window.react = function (type) {
+            const reactionRef = ref(db, "reactions/" + type);
+            get(reactionRef).then(snapshot => {
+                let currentCount = snapshot.val() || 0;
+                update(reactionRef, { ".value": currentCount + 1 });
+            });
+        }
+
+  // Listen for real-time updates
+        const reactionsRef = ref(db, "reactions");
+        onValue(reactionsRef, (snapshot) => {
+            let data = snapshot.val() || {};
+            let totalResponses = 0;
+            for (let type in data) {
+                document.getElementById(type).innerText = data[type];
+                totalResponses += data[type];
+            }
+            document.getElementById("response-count").innerText = ${totalResponses} Responses;
+        });
+    </script>
+
+</body>
+</html>
